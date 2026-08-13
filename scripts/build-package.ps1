@@ -100,7 +100,7 @@ Remove-Item $appZipFile
 
 # Copy scripts to root of package
 $scriptsSource = Join-Path $projectRoot "scripts"
-$scriptsToInclude = @("install-KolkaUICameras.sh", "update-KolkaUICameras.sh", "verify-KolkaUICameras.sh")
+$scriptsToInclude = @("install-KolkaUICameras.sh", "update-KolkaUICameras.sh", "uninstall-KolkaUICameras.sh", "verify-KolkaUICameras.sh")
 foreach ($script in $scriptsToInclude) {
     $scriptSource = Join-Path $scriptsSource $script
     if (Test-Path $scriptSource) {
@@ -124,4 +124,5 @@ Write-Host "Archive contents:" -ForegroundColor Cyan
 Write-Host "  - app.zip (application files)"
 Write-Host "  - install-KolkaUICameras.sh"
 Write-Host "  - update-KolkaUICameras.sh"
+Write-Host "  - uninstall-KolkaUICameras.sh"
 Write-Host "  - verify-KolkaUICameras.sh"

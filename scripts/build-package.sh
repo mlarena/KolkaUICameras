@@ -70,6 +70,7 @@ mv "$APP_ZIP" "$PACKAGE_DIR/"
 SCRIPTS_TO_INCLUDE=(
     install-KolkaUICameras.sh
     update-KolkaUICameras.sh
+    uninstall-KolkaUICameras.sh
     verify-KolkaUICameras.sh
 )
 for script in "${SCRIPTS_TO_INCLUDE[@]}"; do
@@ -94,4 +95,5 @@ echo -e "\033[36mArchive contents:\033[0m"
 echo "  - app.zip (application files)"
 echo "  - install-KolkaUICameras.sh"
 echo "  - update-KolkaUICameras.sh"
+echo "  - uninstall-KolkaUICameras.sh"
 echo "  - verify-KolkaUICameras.sh"
