@@ -296,7 +296,7 @@ Type=simple
 User=www-data
 Group=www-data
 WorkingDirectory=$APP_DIR
-Environment="PATH=$APP_DIR/venv/bin"
+Environment="PATH=$APP_DIR/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 EnvironmentFile=$APP_DIR/.env
 ExecStart=$APP_DIR/venv/bin/gunicorn \\
     --workers 4 \\

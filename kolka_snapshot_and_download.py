@@ -91,6 +91,8 @@ class SnapshotDownloadManager:
                 parts = line.split(':')
                 if len(parts) >= 2 and parts[1] == 'wifi':
                     return parts[0]
+        except FileNotFoundError:
+            logger.error("nmcli не найден. Установите: apt install network-manager")
         except Exception:
             pass
         return "wlan0"
@@ -158,6 +160,9 @@ class SnapshotDownloadManager:
         try:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
             return result.stdout, result.stderr, result.returncode
+        except FileNotFoundError:
+            logger.error("nmcli не найден. Установите: apt install network-manager")
+            return "", "nmcli not found", 1
         except subprocess.TimeoutExpired:
             return "", "timeout", 1
         except Exception as e:
@@ -461,6 +466,12 @@ class SnapshotDownloadManager:
 
     async def run(self):
         await self.init_db()
+
+        # Предварительная проверка наличия nmcli
+        import shutil
+        if not shutil.which("nmcli"):
+            logger.error("nmcli не найден в PATH. Установите: apt install network-manager")
+            return
 
         try:
             async with self.async_session() as session:

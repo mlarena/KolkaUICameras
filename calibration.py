@@ -170,6 +170,9 @@ class WifiManager:
         try:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
             return result.stdout, result.stderr, result.returncode
+        except FileNotFoundError:
+            logger.error("nmcli не найден. Установите: apt install network-manager")
+            return "", "nmcli not found", 1
         except subprocess.TimeoutExpired:
             logger.warning("nmcli timeout: %s", " ".join(cmd))
             return "", "timeout", 1
@@ -498,6 +501,13 @@ async def run_calibration(config_path: str = "appsettings.json"):
     error_messages = []
 
     logger.info("Калибровка запущена (Linux)")
+
+    # Предварительная проверка наличия nmcli
+    import shutil
+    if not shutil.which("nmcli"):
+        logger.error("nmcli не найден в PATH. Установите: apt install network-manager")
+        logger.error("Калибровка невозможна без nmcli.")
+        return
 
     # Читаем конфиг из файла для получения строки подключения к БД
     with open(config_path, "r", encoding="utf-8") as f:
