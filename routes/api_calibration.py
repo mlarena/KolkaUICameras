@@ -53,9 +53,15 @@ def _run_calibration_thread():
     handler = _CalibrationLogHandler(log_queue)
     handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
 
+    # Root logger must be at least INFO so that messages from child loggers
+    # (with propagate=True) are not silently dropped before reaching our handler.
+    root_logger = logging.getLogger()
+    prev_root_level = root_logger.level
+    root_logger.setLevel(logging.INFO)
+    root_logger.addHandler(handler)
+
     cal_logger = logging.getLogger("calibration")
     cal_logger.setLevel(logging.INFO)
-    cal_logger.addHandler(handler)
 
     try:
         from calibration import run_calibration
@@ -65,7 +71,8 @@ def _run_calibration_thread():
         _calibration_state['status'] = f'error: {e}'
         cal_logger.error("Calibration failed: %s", e)
     finally:
-        cal_logger.removeHandler(handler)
+        root_logger.removeHandler(handler)
+        root_logger.setLevel(prev_root_level)
         _drain_queue()
         _calibration_state['running'] = False
 

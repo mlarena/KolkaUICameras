@@ -71,6 +71,8 @@ def _run_snapshot_thread():
     sd_logger.addHandler(handler)
 
     root_logger = logging.getLogger()
+    prev_root_level = root_logger.level
+    root_logger.setLevel(logging.INFO)
     root_logger.addHandler(handler)
 
     try:
@@ -143,6 +145,7 @@ def _run_snapshot_thread():
         logging.error("Snapshot+Download failed: %s", e)
     finally:
         root_logger.removeHandler(handler)
+        root_logger.setLevel(prev_root_level)
         sd_logger.removeHandler(handler)
         _drain_queue()
         _state['running'] = False

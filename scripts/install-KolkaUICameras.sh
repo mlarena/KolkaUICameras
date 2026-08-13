@@ -249,13 +249,13 @@ if ! systemctl is-active --quiet postgresql; then
 fi
 
 # Set postgres user password
-sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '${DB_PASSWORD}';" 2>&1 | tee -a "$LOG_FILE" || true
+PGPASSWORD="${DB_PASSWORD}" psql -h localhost -U postgres -c "ALTER USER postgres WITH PASSWORD '${DB_PASSWORD}';" 2>&1 | tee -a "$LOG_FILE" || true
 
 # Create database if not exists
-DB_EXISTS=$(sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='${DB_NAME}'" 2>/dev/null)
+DB_EXISTS=$(PGPASSWORD="${DB_PASSWORD}" psql -h localhost -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname='${DB_NAME}'" 2>/dev/null)
 if [[ "$DB_EXISTS" != "1" ]]; then
     print_status "Creating database ${DB_NAME}..."
-    sudo -u postgres psql -c "CREATE DATABASE ${DB_NAME};" 2>&1 | tee -a "$LOG_FILE"
+    PGPASSWORD="${DB_PASSWORD}" psql -h localhost -U postgres -c "CREATE DATABASE ${DB_NAME};" 2>&1 | tee -a "$LOG_FILE"
     print_success "Database created"
 else
     print_success "Database ${DB_NAME} already exists"

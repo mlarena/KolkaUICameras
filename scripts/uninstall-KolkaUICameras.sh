@@ -137,16 +137,16 @@ fi
 print_status "Step 4: Dropping database $DB_NAME..."
 
 if systemctl is-active --quiet postgresql 2>/dev/null; then
-    DB_EXISTS=$(sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='${DB_NAME}'" 2>/dev/null || echo "")
+    DB_EXISTS=$(PGPASSWORD="${DB_PASSWORD}" psql -h localhost -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname='${DB_NAME}'" 2>/dev/null || echo "")
     if [[ "$DB_EXISTS" == "1" ]]; then
         # Terminate active connections to the database
-        sudo -u postgres psql -c "
+        PGPASSWORD="${DB_PASSWORD}" psql -h localhost -U postgres -c "
             SELECT pg_terminate_backend(pid)
             FROM pg_stat_activity
             WHERE datname = '${DB_NAME}' AND pid <> pg_backend_pid();
         " 2>&1 | tee -a "$LOG_FILE" || true
 
-        sudo -u postgres psql -c "DROP DATABASE ${DB_NAME};" 2>&1 | tee -a "$LOG_FILE"
+        PGPASSWORD="${DB_PASSWORD}" psql -h localhost -U postgres -c "DROP DATABASE ${DB_NAME};" 2>&1 | tee -a "$LOG_FILE"
         print_success "Database $DB_NAME dropped"
     else
         print_warning "Database $DB_NAME does not exist"
