@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход - PhotoTrap Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}">
+</head>
+<body class="bg-body">
+    <div class="d-flex align-items-center justify-content-center min-vh-100 p-3">
+        <div class="w-100" style="max-width: 400px;">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold text-primary">PhotoTrap</h2>
+                        <small class="text-muted">Панель мониторинга</small>
+                    </div>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-danger py-2 small">{{ message }}</div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label class="form-label">Имя пользователя</label>
+                            <input type="text" name="username" required class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Пароль</label>
+                            <div class="input-group">
+                                <input type="password" name="password" required class="form-control" id="passwordInput">
+                                <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility()">
+                                    <i id="eyeIcon" class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="error-message" class="alert alert-danger py-2 small d-none"></div>
+                        <button type="submit" class="btn btn-primary w-100">Войти</button>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <button onclick="toggleTheme()" class="btn btn-sm btn-outline-secondary">
+                            <i id="theme-icon-login" class="bi bi-moon"></i>
+                            <span id="theme-text-login">Тёмная тема</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script>
+        function togglePasswordVisibility() {
+            const input = document.getElementById('passwordInput');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        }
+
+        function updateLoginThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon-login');
+            const text = document.getElementById('theme-text-login');
+            if (icon && text) {
+                icon.className = theme === 'dark' ? 'bi bi-sun' : 'bi bi-moon';
+                text.textContent = theme === 'dark' ? 'Светлая тема' : 'Тёмная тема';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const theme = getTheme();
+            updateLoginThemeIcon(theme);
+        });
+
+        const origToggle = window.toggleTheme;
+        window.toggleTheme = function() {
+            origToggle();
+            updateLoginThemeIcon(getTheme());
+        };
+
+        if (localStorage.getItem('token')) {
+            window.location.href = '/dashboard';
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const errorDiv = document.getElementById('error-message');
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: form.username.value,
+                        password: form.password.value
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    window.location.href = data.redirect;
+                } else {
+                    errorDiv.textContent = data.error || 'Ошибка авторизации';
+                    errorDiv.classList.remove('d-none');
+                }
+            } catch (err) {
+                errorDiv.textContent = 'Ошибка подключения к серверу';
+                errorDiv.classList.remove('d-none');
+            }
+        });
+    </script>
+</body>
+</html>

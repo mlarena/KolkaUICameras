@@ -1,0 +1,5 @@
+systemctl status kolka-uicameras.service
+systemctl stop kolka-uicameras.service
+systemctl start kolka-uicameras.service
+sudo journalctl -u kolka-uicameras.service -f
+psql -U postgres -h localhost -d postgres

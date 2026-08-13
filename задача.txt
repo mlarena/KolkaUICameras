@@ -1,0 +1,192 @@
+необходимо создать flask приложение для базы данных postgres
+ "DefaultConnection": "Host=localhost;Database=phototrapdb;Username=postgres;Password=12345678"
+
+
+-- Таблица фото ловушек
+CREATE TABLE "PhotoTrap" (
+    "Id" SERIAL PRIMARY KEY,
+    "Name" VARCHAR(255) NOT NULL,
+    "MacAddress" VARCHAR(50) UNIQUE,
+    "WifiSSID" VARCHAR(100),
+    "Description" TEXT,
+    "Latitude" DECIMAL(10, 8),
+    "Longitude" DECIMAL(11, 8),
+    "IsActive" BOOLEAN DEFAULT TRUE NOT NULL,
+    "CreatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "UpdatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица логов загрузки
+CREATE TABLE "PhotoTrapDownloadLog" (
+    "Id" SERIAL PRIMARY KEY,
+    "PhotoTrapId" INTEGER NOT NULL REFERENCES "PhotoTrap"("Id") ON DELETE CASCADE,
+    
+    -- Поля из XML файла
+    "FileName" VARCHAR(255),           -- <NAME>
+    "FilePath" VARCHAR(500),           -- <FPATH>
+    "FileSize" BIGINT,                 -- <SIZE> (в байтах)
+    "TimeCode" BIGINT,                 -- <TIMECODE>
+    "FileTime" TIMESTAMP,              -- <TIME> (преобразованный)
+    
+    -- Статус и ошибки
+    "IsSuccess" BOOLEAN DEFAULT FALSE,
+    "ErrorMessage" TEXT,
+    
+    -- Дополнительные поля
+    "LocalPath" VARCHAR(500),          -- путь к сохраненному файлу локально
+    "DownloadedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица дневного лога опроса
+CREATE TABLE "PhotoTrapDailyLog" (
+    "Id" SERIAL PRIMARY KEY,
+    "PhotoTrapId" INTEGER NOT NULL REFERENCES "PhotoTrap"("Id") ON DELETE CASCADE,
+    "StartTime" TIMESTAMP NOT NULL,
+    "EndTime" TIMESTAMP,
+    "LogMessage" TEXT,
+    "ErrorMessage" TEXT,
+    "CreatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Индексы для оптимизации запросов
+CREATE INDEX "idx_downloadlog_phototrapid" ON "PhotoTrapDownloadLog"("PhotoTrapId");
+CREATE INDEX "idx_downloadlog_downloadedat" ON "PhotoTrapDownloadLog"("DownloadedAt");
+CREATE INDEX "idx_downloadlog_issuccess" ON "PhotoTrapDownloadLog"("IsSuccess");
+CREATE INDEX "idx_downloadlog_filename" ON "PhotoTrapDownloadLog"("FileName");
+CREATE INDEX "idx_downloadlog_filetime" ON "PhotoTrapDownloadLog"("FileTime");
+
+CREATE INDEX "idx_dailylog_phototrapid" ON "PhotoTrapDailyLog"("PhotoTrapId");
+CREATE INDEX "idx_dailylog_starttime" ON "PhotoTrapDailyLog"("StartTime");
+CREATE INDEX "idx_dailylog_endtime" ON "PhotoTrapDailyLog"("EndTime");
+CREATE INDEX "idx_dailylog_createdat" ON "PhotoTrapDailyLog"("CreatedAt");
+
+-- Таблица конфигурации приложения
+CREATE TABLE "PhotoTrapConfig" (
+    "Id" SERIAL PRIMARY KEY,
+    "Key" VARCHAR(100) NOT NULL UNIQUE,
+    "Value" TEXT NOT NULL,
+    "Description" TEXT,
+    "CreatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "UpdatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX "idx_config_key" ON "PhotoTrapConfig"("Key");
+
+создержимое таблицы
+-- Заполнение таблицы конфигурации начальными значениями
+INSERT INTO "PhotoTrapConfig" ("Key", "Value", "Description") VALUES
+('NeedCalibration', 'false', 'Запускать калибровку (фаза 1+2) перед загрузкой файлов'),
+('DownloadPath', 'E:\\TestFoto\\images', 'Папка для сохранения файлов с камер'),
+('CamerasCount', '1', 'Сколько камер должно быть в таблице PhotoTrap'),
+('WifiPassword', '12345678', 'Пароль Wi-Fi сети камеры (WPA2PSK)'),
+('BleScanTimeout', '10', 'Время BLE-сканирования (сек)'),
+('BleCommandTimeout', '10', 'Таймаут BLE-подключения (сек)'),
+('WifiWaitAfterOpen', '25', 'Ожидание после BLE open перед подключением к Wi-Fi (сек)'),
+('WifiConnectTimeout', '45', 'Таймаут подключения к Wi-Fi сети камеры (сек)'),
+('CloseWaitSeconds', '25', 'Пауза после close на все камеры (сек)'),
+('RetryDelay', '15', 'Задержка между повторными попытками (сек)'),
+('MaxRetriesPerCamera', '3', 'Попыток найти SSID / подключиться к одной камере'),
+('MaxScanRetries', '10', 'Попыток BLE-сканирования для фазы 1'),
+('CameraCooldown', '20', 'Пауза между разными камерами (сек)'),
+('CompressQuality', '12', 'Качество сжатия ffmpeg -q:v (1-31, чем меньше тем лучше)'),
+('WifiDownloadRetries', '3', 'Попыток реконнекта Wi-Fi при обрыве во время загрузки файлов');
+
+models.py
+from sqlalchemy import Column, Integer, String, Text, DECIMAL, TIMESTAMP, BigInteger, Boolean, ForeignKey, Index
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.sql import func
+from datetime import datetime
+
+Base = declarative_base()
+
+class PhotoTrap(Base):
+    __tablename__ = 'PhotoTrap'
+    
+    Id = Column(Integer, primary_key=True, autoincrement=True)
+    Name = Column(String(255), nullable=False)
+    MacAddress = Column(String(50), unique=True)
+    WifiSSID = Column(String(100))
+    Description = Column(Text)
+    Latitude = Column(DECIMAL(10, 8))
+    Longitude = Column(DECIMAL(11, 8))
+    IsActive = Column(Boolean, default=True, nullable=False)
+    CreatedAt = Column(TIMESTAMP, server_default=func.now())
+    UpdatedAt = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+class PhotoTrapDownloadLog(Base):
+    __tablename__ = 'PhotoTrapDownloadLog'
+    
+    Id = Column(Integer, primary_key=True, autoincrement=True)
+    PhotoTrapId = Column(Integer, ForeignKey('PhotoTrap.Id', ondelete='CASCADE'), nullable=False)
+    FileName = Column(String(255))
+    FilePath = Column(String(500))
+    FileSize = Column(BigInteger)
+    TimeCode = Column(BigInteger)
+    FileTime = Column(TIMESTAMP)
+    IsSuccess = Column(Boolean, default=False)
+    ErrorMessage = Column(Text)
+    LocalPath = Column(String(500))
+    DownloadedAt = Column(TIMESTAMP, server_default=func.now())
+
+# Индексы для оптимизации
+Index('idx_downloadlog_phototrapid', PhotoTrapDownloadLog.PhotoTrapId)
+Index('idx_downloadlog_downloadedat', PhotoTrapDownloadLog.DownloadedAt)
+Index('idx_downloadlog_issuccess', PhotoTrapDownloadLog.IsSuccess)
+Index('idx_downloadlog_filename', PhotoTrapDownloadLog.FileName)
+Index('idx_downloadlog_filetime', PhotoTrapDownloadLog.FileTime)
+
+
+class PhotoTrapDailyLog(Base):
+    __tablename__ = 'PhotoTrapDailyLog'
+
+    Id = Column(Integer, primary_key=True, autoincrement=True)
+    PhotoTrapId = Column(Integer, ForeignKey('PhotoTrap.Id', ondelete='CASCADE'), nullable=False)
+    StartTime = Column(TIMESTAMP, nullable=False)
+    EndTime = Column(TIMESTAMP)
+    LogMessage = Column(Text)
+    ErrorMessage = Column(Text)
+    CreatedAt = Column(TIMESTAMP, server_default=func.now())
+
+Index('idx_dailylog_phototrapid', PhotoTrapDailyLog.PhotoTrapId)
+Index('idx_dailylog_starttime', PhotoTrapDailyLog.StartTime)
+Index('idx_dailylog_endtime', PhotoTrapDailyLog.EndTime)
+Index('idx_dailylog_createdat', PhotoTrapDailyLog.CreatedAt)
+
+
+class PhotoTrapConfig(Base):
+    __tablename__ = 'PhotoTrapConfig'
+
+    Id = Column(Integer, primary_key=True, autoincrement=True)
+    Key = Column(String(100), unique=True, nullable=False)
+    Value = Column(Text, nullable=False)
+    Description = Column(Text)
+    CreatedAt = Column(TIMESTAMP, server_default=func.now())
+    UpdatedAt = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+Index('idx_config_key', PhotoTrapConfig.Key)
+
+для таблицы
+"PhotoTrap" возможность редактировать только поля 
+"Description" TEXT,
+    "Latitude" DECIMAL(10, 8),
+    "Longitude" DECIMAL(11, 8),
+    "IsActive" BOOLEAN DEFAULT TRUE NOT NULL,
+
+для таблицы "PhotoTrapDownloadLog" только чтение. с возможностью пагинации, сортировки и фильтрации
+
+для таблицы "PhotoTrapDailyLog" только чтение. с возможностью  пагинации, сортировки и фильтрации
+
+для таблицы "PhotoTrapConfig" редиктирование только поле "Value"
+
+добавить jwt авторизацию и создать необходимые таблицы.
+
+javascript и css строго только локально. 
+сделать возможность переключения тем, светлая темная.
+адаптивно для мобильных устройств.
+стили визуально схожие с  tailwind
+приложение создать в стиле админки как сейчас делают для ml сайтов.
+добавить виртуальное окружение.
+
+
+
+

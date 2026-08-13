@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% block title %}Панель мониторинга - PhotoTrap Admin{% endblock %}
+{% block page_title %}Панель мониторинга{% endblock %}
+{% block content %}
+<!-- Stats cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-6 col-lg-3">
+        <div class="card">
+            <div class="card-body py-2 px-3 text-nowrap">
+                <small class="text-muted">Всего ловушек</small>
+                <p id="stat-traps" class="fs-4 fw-bold mb-0">0</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-6 col-lg-3">
+        <div class="card">
+            <div class="card-body py-2 px-3 text-nowrap">
+                <small class="text-muted">Активные</small>
+                <p id="stat-active" class="fs-4 fw-bold mb-0">0</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-6 col-lg-3">
+        <div class="card">
+            <div class="card-body py-2 px-3 text-nowrap">
+                <small class="text-muted">Загрузок сегодня</small>
+                <p id="stat-downloads" class="fs-4 fw-bold mb-0">0</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-6 col-lg-3">
+        <div class="card">
+            <div class="card-body py-2 px-3 text-nowrap">
+                <small class="text-muted">Ошибок сегодня</small>
+                <p id="stat-errors" class="fs-4 fw-bold mb-0">0</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs content -->
+<div class="card">
+    <div class="card-body p-3 p-md-4">
+        <!-- Tab: Traps -->
+        <div id="tab-traps" class="tab-content-item">
+            <div id="traps-table"></div>
+        </div>
+
+        <!-- Tab: Downloads -->
+        <div id="tab-downloads" class="tab-content-item d-none">
+            <div id="downloads-pagination-top" class="mb-3"></div>
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <div id="dl-quick-dates" class="btn-group btn-group-sm flex-nowrap overflow-auto" role="group"></div>
+                <button onclick="loadDownloadLogs()" class="btn btn-sm btn-outline-primary" title="Обновить"><i class="bi bi-arrow-clockwise"></i> Обновить</button>
+                <select id="dl-trap-filter" onchange="loadDownloadLogs()" class="form-select form-select-sm" style="width: 160px;">
+                    <option value="">Все ловушки</option>
+                </select>
+                <select id="dl-status-filter" onchange="loadDownloadLogs()" class="form-select form-select-sm" style="width: 120px;">
+                    <option value="">Все статусы</option>
+                    <option value="true">Успешно</option>
+                    <option value="false">Ошибка</option>
+                </select>
+                <div class="input-group input-group-sm" style="width: 160px;">
+                    <span class="input-group-text">С:</span>
+                    <input type="datetime-local" id="dl-date-from" onchange="loadDownloadLogs()" class="form-control form-control-sm">
+                </div>
+                <div class="input-group input-group-sm" style="width: 160px;">
+                    <span class="input-group-text">По:</span>
+                    <input type="datetime-local" id="dl-date-to" onchange="loadDownloadLogs()" class="form-control form-control-sm">
+                </div>
+                <button onclick="clearDownloadFilters()" class="btn btn-sm btn-outline-secondary">Сбросить</button>
+                <small id="downloads-info" class="text-muted"></small>
+            </div>
+            <div id="downloads-table"></div>
+            <div id="downloads-pagination" class="mt-3"></div>
+        </div>
+
+        <!-- Tab: Snapshots -->
+        <div id="tab-snapshots" class="tab-content-item d-none">
+            <div id="snapshots-pagination-top" class="mb-3"></div>
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <div id="snap-quick-dates" class="btn-group btn-group-sm flex-nowrap overflow-auto" role="group"></div>
+                <button onclick="loadSnapshotLogs()" class="btn btn-sm btn-outline-primary" title="Обновить"><i class="bi bi-arrow-clockwise"></i> Обновить</button>
+                <select id="snap-trap-filter" onchange="loadSnapshotLogs()" class="form-select form-select-sm" style="width: 160px;">
+                    <option value="">Все ловушки</option>
+                </select>
+                <select id="snap-status-filter" onchange="loadSnapshotLogs()" class="form-select form-select-sm" style="width: 120px;">
+                    <option value="">Все статусы</option>
+                    <option value="PENDING">Ожидание</option>
+                    <option value="OK">OK</option>
+                    <option value="ERROR">Ошибка</option>
+                </select>
+                <select id="snap-error-filter" onchange="loadSnapshotLogs()" class="form-select form-select-sm" style="width: 130px;">
+                    <option value="">Все</option>
+                    <option value="true">С ошибками</option>
+                    <option value="false">Без ошибок</option>
+                </select>
+                <select id="snap-activity-filter" onchange="loadSnapshotLogs()" class="form-select form-select-sm" style="width: 140px;">
+                    <option value="">Все типы</option>
+                    <option value="photo">Фото</option>
+                    <option value="download">Загрузка</option>
+                </select>
+                <div class="input-group input-group-sm" style="width: 160px;">
+                    <span class="input-group-text">С:</span>
+                    <input type="datetime-local" id="snap-date-from" onchange="loadSnapshotLogs()" class="form-control form-control-sm">
+                </div>
+                <div class="input-group input-group-sm" style="width: 160px;">
+                    <span class="input-group-text">По:</span>
+                    <input type="datetime-local" id="snap-date-to" onchange="loadSnapshotLogs()" class="form-control form-control-sm">
+                </div>
+                <button onclick="clearSnapshotFilters()" class="btn btn-sm btn-outline-secondary">Сбросить</button>
+                <small id="snapshots-info" class="text-muted"></small>
+            </div>
+            <div id="snapshots-table"></div>
+            <div id="snapshots-pagination" class="mt-3"></div>
+        </div>
+
+        <!-- Tab: Config -->
+        <div id="tab-config" class="tab-content-item d-none">
+            <div id="config-table"></div>
+        </div>
+
+        <!-- Tab: Users -->
+        <div id="tab-users" class="tab-content-item d-none">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <small id="users-info" class="text-muted"></small>
+                <button onclick="showCreateUserModal()" class="btn btn-primary btn-sm">Добавить пользователя</button>
+            </div>
+            <div id="users-table"></div>
+        </div>
+
+        <!-- Tab: Calibration -->
+        <div id="tab-calibration" class="tab-content-item d-none">
+            <div class="mb-3">
+                <button id="cal-start-btn" onclick="startCalibration()" class="btn btn-primary btn-sm">
+                    <i class="bi bi-broadcast"></i> Запустить калибровку
+                </button>
+                <button id="cal-stop-btn" onclick="stopCalibration()" class="btn btn-danger btn-sm d-none">
+                    <i class="bi bi-stop-fill"></i> Остановить
+                </button>
+                <span id="cal-status" class="ms-2 text-muted small"></span>
+            </div>
+            <div id="cal-log-container" class="bg-dark text-light p-3 rounded font-monospace small" style="height: 400px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;">
+                <div id="cal-log">Ожидание запуска...</div>
+            </div>
+        </div>
+
+        <!-- Tab: Snapshot + Download -->
+        <div id="tab-snapshot-download" class="tab-content-item d-none">
+            <div class="mb-3">
+                <button id="sd-start-btn" onclick="startSnapshotDownload()" class="btn btn-primary btn-sm">
+                    <i class="bi bi-camera"></i> Запустить снимок + загрузку
+                </button>
+                <button id="sd-stop-btn" onclick="stopSnapshotDownload()" class="btn btn-danger btn-sm d-none">
+                    <i class="bi bi-stop-fill"></i> Остановить
+                </button>
+                <span id="sd-status" class="ms-2 text-muted small"></span>
+            </div>
+            <div id="sd-log-container" class="bg-dark text-light p-3 rounded font-monospace small" style="height: 400px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;">
+                <div id="sd-log">Ожидание запуска...</div>
+            </div>
+        </div>
+
+        <!-- Tab: Database -->
+        <div id="tab-database" class="tab-content-item d-none">
+            <div class="border border-danger rounded-3 p-4">
+                <h5 class="text-danger">Опасная зона</h5>
+                <p class="text-muted small">Очистка базы данных удалит ВСЕ данные из таблиц. Это действие необратимо!</p>
+                <button onclick="showTruncateModal()" class="btn btn-danger btn-sm">Очистить базу данных</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (!checkAuth()) return;
+    const hash = window.location.hash.replace('#', '') || 'traps';
+    switchTab(hash);
+    loadStats();
+
+    const fpConfig = {
+        locale: "ru", enableTime: true, dateFormat: "Y-m-d H:i",
+        altInput: true, altFormat: "d.m.Y H:i", time_24hr: true,
+        allowInput: true, disableMobile: "true",
+        onChange: function(sel, dateStr, inst) {
+            inst.element.dispatchEvent(new Event('change'));
+        }
+    };
+
+    ['dl-date-from', 'dl-date-to', 'snap-date-from', 'snap-date-to'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) flatpickr(el, fpConfig);
+    });
+
+    generateQuickDateButtons('dl-quick-dates', 'dl');
+    generateQuickDateButtons('snap-quick-dates', 'snap');
+});
+</script>
+{% endblock %}

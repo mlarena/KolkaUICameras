@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PhotoTrap Admin{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/flatpickr.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <!-- Offcanvas sidebar for mobile -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title fw-bold">Фотоловушки</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+            <nav class="nav flex-column p-3">
+                <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded active" data-tab="traps" href="javascript:void(0)" onclick="navigateTab('traps')">
+                    <i class="bi bi-camera"></i> Фотоловушки
+                </a>
+                <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="downloads" href="javascript:void(0)" onclick="navigateTab('downloads')">
+                    <i class="bi bi-download"></i> Загрузки
+                </a>
+                <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="snapshots" href="javascript:void(0)" onclick="navigateTab('snapshots')">
+                    <i class="bi bi-images"></i> Логи сервисов
+                </a>
+                <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="config" href="javascript:void(0)" onclick="navigateTab('config')">
+                    <i class="bi bi-gear"></i> Настройки
+                </a>
+                <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="users" href="javascript:void(0)" onclick="navigateTab('users')">
+                    <i class="bi bi-people"></i> Пользователи
+                </a>
+                <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="calibration" href="javascript:void(0)" onclick="navigateTab('calibration')">
+                    <i class="bi bi-broadcast"></i> Калибровка
+                </a>
+                <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="snapshot-download" href="javascript:void(0)" onclick="navigateTab('snapshot-download')">
+                    <i class="bi bi-camera"></i> Снимок + Загрузка
+                </a>
+                <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="database" href="javascript:void(0)" onclick="navigateTab('database')">
+                    <i class="bi bi-database"></i> База данных
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="d-flex min-vh-100">
+        <!-- Desktop sidebar -->
+        <aside class="d-none d-lg-flex flex-column position-fixed top-0 start-0 bottom-0 bg-body border-end" style="width: 260px; z-index: 1045;">
+            <div class="p-4 border-bottom">
+                <h5 class="fw-bold mb-0">Фотоловушки</h5>
+                <small class="text-muted">Панель мониторинга</small>
+            </div>
+            <nav class="nav flex-column p-3 flex-grow-1">
+                <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded active" data-tab="traps" href="javascript:void(0)" onclick="navigateTab('traps')">
+                    <i class="bi bi-camera"></i> Фотоловушки
+                </a>
+                <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="downloads" href="javascript:void(0)" onclick="navigateTab('downloads')">
+                    <i class="bi bi-download"></i> Загрузки
+                </a>
+                <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="snapshots" href="javascript:void(0)" onclick="navigateTab('snapshots')">
+                    <i class="bi bi-images"></i> Логи сервисов
+                </a>
+                <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="config" href="javascript:void(0)" onclick="navigateTab('config')">
+                    <i class="bi bi-gear"></i> Настройки
+                </a>
+                <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="users" href="javascript:void(0)" onclick="navigateTab('users')">
+                    <i class="bi bi-people"></i> Пользователи
+                </a>
+                <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="calibration" href="javascript:void(0)" onclick="navigateTab('calibration')">
+                    <i class="bi bi-broadcast"></i> Калибровка
+                </a>
+                <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="snapshot-download" href="javascript:void(0)" onclick="navigateTab('snapshot-download')">
+                    <i class="bi bi-camera"></i> Снимок + Загрузка
+                </a>
+                <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="database" href="javascript:void(0)" onclick="navigateTab('database')">
+                    <i class="bi bi-database"></i> База данных
+                </a>
+            </nav>
+            <div class="p-3 border-top">
+                <button onclick="toggleTheme()" class="btn btn-sm btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 mb-2">
+                    <i id="theme-icon" class="bi bi-moon"></i>
+                    <span id="theme-text">Тёмная тема</span>
+                </button>
+                <form action="/logout" method="POST" onsubmit="localStorage.removeItem('token');">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2">
+                        <i class="bi bi-box-arrow-left"></i> Выйти
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main content -->
+        <main class="flex-grow-1 main-content">
+            <!-- Top navbar -->
+            <nav class="navbar bg-body border-bottom sticky-top px-3">
+                <button class="btn btn-sm btn-outline-secondary d-lg-none me-2" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+                <span class="navbar-text fw-semibold">{% block page_title %}Dashboard{% endblock %}</span>
+            </nav>
+
+            <div class="p-3 p-md-4">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit modal -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="modal-title" class="modal-title">Редактирование</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="edit-form" class="modal-body"></form>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/traps.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/downloads.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/snapshots.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/config.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/users.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/database.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/calibration.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/snapshot_download.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/flatpickr.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ru.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
