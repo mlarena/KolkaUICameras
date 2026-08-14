@@ -36,6 +36,7 @@ CREATE TABLE "SnapshotLog" (
     "EndTime" TIMESTAMP,
     "FileName" VARCHAR(255),
     "Status" VARCHAR(20) DEFAULT 'PENDING',
+    "ActivityType" VARCHAR(20) NOT NULL DEFAULT 'photo',
     "LogMessage" TEXT,
     "ErrorMessage" TEXT,
     "CreatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -45,6 +46,7 @@ CREATE INDEX "idx_snaplog_phototrapid" ON "SnapshotLog"("PhotoTrapId");
 CREATE INDEX "idx_snaplog_starttime" ON "SnapshotLog"("StartTime");
 CREATE INDEX "idx_snaplog_status" ON "SnapshotLog"("Status");
 CREATE INDEX "idx_snaplog_createdat" ON "SnapshotLog"("CreatedAt");
+CREATE INDEX "idx_snaplog_activitytype" ON "SnapshotLog"("ActivityType");
 
 -- Таблица логов загрузки файлов
 CREATE TABLE "DownloadLog" (

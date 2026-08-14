@@ -1,7 +1,7 @@
 -- Заполнение таблицы конфигурации начальными значениями
 INSERT INTO "PhotoTrapConfig" ("Key", "Value", "Description") VALUES
 ('NeedCalibration', 'false', 'Запускать калибровку (фаза 1+2) перед загрузкой файлов'),
-('DownloadPath', '/opt/KolkaUICameras/images', 'Папка для сохранения файлов с камер'),
+('DownloadPath', '/outgoing/cameratrap/', 'Папка для сохранения файлов с камер'),
 ('CamerasCount', '1', 'Сколько камер должно быть в таблице PhotoTrap'),
 ('WifiPassword', '12345678', 'Пароль Wi-Fi сети камеры (WPA2PSK)'),
 ('BleScanTimeout', '10', 'Время BLE-сканирования (сек)'),

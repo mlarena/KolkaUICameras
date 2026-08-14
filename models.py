@@ -66,6 +66,7 @@ class SnapshotLog(Base):
 Index('idx_snaplog_phototrapid', SnapshotLog.PhotoTrapId)
 Index('idx_snaplog_starttime', SnapshotLog.StartTime)
 Index('idx_snaplog_status', SnapshotLog.Status)
+Index('idx_snaplog_activitytype', SnapshotLog.ActivityType)
 Index('idx_snaplog_createdat', SnapshotLog.CreatedAt)
 
 

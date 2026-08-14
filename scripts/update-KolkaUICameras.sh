@@ -111,9 +111,23 @@ rm -f /tmp/kolka_env_backup
 print_success "Update files extracted"
 
 # ============================================================================
-# Step 5: Update dependencies
+# Step 5: Database migrations
 # ============================================================================
-print_status "Step 5: Updating Python dependencies..."
+print_status "Step 5: Applying database migrations..."
+
+DB_NAME="phototrapdb"
+DB_USER="postgres"
+
+# Migration: Add ActivityType column to SnapshotLog
+psql -U "$DB_USER" -d "$DB_NAME" -c "ALTER TABLE \"SnapshotLog\" ADD COLUMN IF NOT EXISTS \"ActivityType\" VARCHAR(20) NOT NULL DEFAULT 'photo';" 2>&1 | tee -a "$LOG_FILE" || true
+psql -U "$DB_USER" -d "$DB_NAME" -c "CREATE INDEX IF NOT EXISTS \"idx_snaplog_activitytype\" ON \"SnapshotLog\"(\"ActivityType\");" 2>&1 | tee -a "$LOG_FILE" || true
+
+print_success "Database migrations applied"
+
+# ============================================================================
+# Step 6: Update dependencies
+# ============================================================================
+print_status "Step 6: Updating Python dependencies..."
 
 source "$APP_DIR/venv/bin/activate"
 pip install --upgrade pip 2>&1 | tee -a "$LOG_FILE"
@@ -122,9 +136,9 @@ pip install -r "$APP_DIR/requirements.txt" 2>&1 | tee -a "$LOG_FILE"
 print_success "Dependencies updated"
 
 # ============================================================================
-# Step 6: Set permissions and start
+# Step 7: Set permissions and start
 # ============================================================================
-print_status "Step 6: Setting permissions and starting..."
+print_status "Step 7: Setting permissions and starting..."
 
 chown -R www-data:www-data "$APP_DIR"
 chmod -R 750 "$APP_DIR"
@@ -136,9 +150,9 @@ systemctl reload nginx 2>/dev/null || true
 print_success "Application started"
 
 # ============================================================================
-# Step 7: Verify
+# Step 8: Verify
 # ============================================================================
-print_status "Step 7: Verifying update..."
+print_status "Step 8: Verifying update..."
 
 sleep 3
 
