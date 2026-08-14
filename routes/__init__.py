@@ -9,6 +9,7 @@ from routes.api_users import api_users_bp
 from routes.api_database import api_database_bp
 from routes.api_calibration import api_calibration_bp
 from routes.api_snapshot_download import api_snapshot_download_bp
+from routes.api_test_data import api_test_data_bp
 
 
 def register_routes(app):
@@ -23,3 +24,4 @@ def register_routes(app):
     app.register_blueprint(api_database_bp)
     app.register_blueprint(api_calibration_bp)
     app.register_blueprint(api_snapshot_download_bp)
+    app.register_blueprint(api_test_data_bp)

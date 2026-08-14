@@ -59,6 +59,13 @@ if (Test-Path $sqlSource) {
     Write-Host "  + sql/" -ForegroundColor Gray
 }
 
+# Copy fortest directory (test data)
+$fortestSource = Join-Path $projectRoot "fortest"
+if (Test-Path $fortestSource) {
+    Copy-Item $fortestSource -Destination (Join-Path $tempDir "fortest") -Recurse
+    Write-Host "  + fortest/" -ForegroundColor Gray
+}
+
 # Create app.zip and fix backslash paths for Linux compatibility
 Write-Host "Creating app.zip..."
 Compress-Archive -Path "$tempDir\*" -DestinationPath $appZipFile -CompressionLevel Optimal

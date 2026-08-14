@@ -161,6 +161,29 @@
             </div>
         </div>
 
+        <!-- Tab: Test Data -->
+        <div id="tab-test-data" class="tab-content-item d-none">
+            <div class="mb-3">
+                <button id="td-generate-btn" onclick="generateTestData()" class="btn btn-warning btn-sm">
+                    <i class="bi bi-lightning"></i> Сгенерировать тестовые данные
+                </button>
+            </div>
+            <div class="mb-3">
+                <h6>Копирует файлы из <code>fortest/</code> в <code>/outgoing/</code></h6>
+                <p class="text-muted small mb-2">При копировании <code>date</code> в имени файла заменяется на текущую дату и время.</p>
+                <table class="table table-sm table-bordered w-auto">
+                    <thead><tr><th>Источник</th><th>Назначение</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>fortest/actinometry/</code></td><td><code>/outgoing/actinometry/</code></td></tr>
+                        <tr><td><code>fortest/cameratrap/</code></td><td><code>/outgoing/cameratrap/</code></td></tr>
+                        <tr><td><code>fortest/meteo/</code></td><td><code>/outgoing/meteo/</code></td></tr>
+                        <tr><td><code>fortest/official_information/</code></td><td><code>/outgoing/official_information/</code></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="td-result"></div>
+        </div>
+
         <!-- Tab: Database -->
         <div id="tab-database" class="tab-content-item d-none">
             <div class="border border-danger rounded-3 p-4">

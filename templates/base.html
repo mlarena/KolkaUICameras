@@ -39,6 +39,9 @@
                 <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="snapshot-download" href="javascript:void(0)" onclick="navigateTab('snapshot-download')">
                     <i class="bi bi-camera"></i> Снимок + Загрузка
                 </a>
+                <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="test-data" href="javascript:void(0)" onclick="navigateTab('test-data')">
+                    <i class="bi bi-lightning"></i> Тестовые данные
+                </a>
                 <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="database" href="javascript:void(0)" onclick="navigateTab('database')">
                     <i class="bi bi-database"></i> База данных
                 </a>
@@ -74,6 +77,9 @@
                 </a>
                 <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="snapshot-download" href="javascript:void(0)" onclick="navigateTab('snapshot-download')">
                     <i class="bi bi-camera"></i> Снимок + Загрузка
+                </a>
+                <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="test-data" href="javascript:void(0)" onclick="navigateTab('test-data')">
+                    <i class="bi bi-lightning"></i> Тестовые данные
                 </a>
                 <a class="nav-link d-flex align-items-center gap-2 py-2 px-3 rounded" data-tab="database" href="javascript:void(0)" onclick="navigateTab('database')">
                     <i class="bi bi-database"></i> База данных
@@ -131,6 +137,7 @@
     <script src="{{ url_for('static', filename='js/database.js') }}"></script>
     <script src="{{ url_for('static', filename='js/calibration.js') }}"></script>
     <script src="{{ url_for('static', filename='js/snapshot_download.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/test_data.js') }}"></script>
     <script src="{{ url_for('static', filename='js/flatpickr.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/ru.js') }}"></script>
     {% block scripts %}{% endblock %}

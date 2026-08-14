@@ -44,7 +44,7 @@ for file in "${ROOT_FILES[@]}"; do
 done
 
 # Copy directories
-DIRS=(routes templates static sql)
+DIRS=(routes templates static sql fortest)
 for dir in "${DIRS[@]}"; do
     if [[ -d "$PROJECT_ROOT/$dir" ]]; then
         cp -r "$PROJECT_ROOT/$dir" "$BUILD_DIR/$dir"

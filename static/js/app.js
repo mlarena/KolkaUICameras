@@ -129,6 +129,7 @@ function switchTab(tab) {
     else if (tab === 'users') loadUsers();
     else if (tab === 'calibration') loadCalibrationStatus();
     else if (tab === 'snapshot-download') loadSnapshotDownloadStatus();
+    // test-data tab is static, no loader needed
 }
 
 // Pagination
